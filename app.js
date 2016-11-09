@@ -3,6 +3,8 @@ const Socket = require('./socks5/socket');
 const net = require('net');
 const url = require('url');
 
+const CAPITALIZE = /(\w)\w+-?/g;
+
 let defautOption = {
     socksPort: 1080,
     socksHost: '127.0.0.1',
@@ -13,18 +15,10 @@ let defautOption = {
 };
 
 function capitalizeFirstLetter (str) {
-    return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
-function keyToUpperCase (key) {
-    if (!key) {
-        return key;
+    if (!str) {
+        return str;
     }
-    let keys = key.split('-');
-    for (let i = 0; i < keys.length; i++) {
-        keys[i] = capitalizeFirstLetter(keys[i]);
-    }
-    return keys.join('-');
+    return str.replace(CAPITALIZE, ($0, $1) => ($1.toUpperCase() + $0.slice(1)));
 }
 
 function proxyRequest (option, res, data) {
@@ -34,7 +28,7 @@ function proxyRequest (option, res, data) {
         //res.writeHead(200, response.headers);
         for (let key in response.headers) {
             if (response.headers.hasOwnProperty(key)) {
-                res.setHeader(keyToUpperCase(key), response.headers[key]);
+                res.setHeader(capitalizeFirstLetter(key), response.headers[key]);
             }
         }
         res.writeHead(response.statusCode);
@@ -68,7 +62,7 @@ http.createServer((req, res) => {
     });
     for (let header in headers) {
         if (headers.hasOwnProperty(header)) {
-            option.headers[keyToUpperCase(header)] = headers[header];
+            option.headers[capitalizeFirstLetter(header)] = headers[header];
         }
     }
     console.log('method: ' + req.method);
